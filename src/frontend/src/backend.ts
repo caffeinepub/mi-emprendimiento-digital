@@ -89,57 +89,34 @@ export class ExternalBlob {
         return this;
     }
 }
-export interface _CaffeineStorageRefillResult {
-    success?: boolean;
-    topped_up_amount?: bigint;
-}
 export interface BlogPost {
-    id: string;
-    coverImageURL: string;
     title: string;
     content: string;
-    published: boolean;
-    createdAt: Time;
-    summary: string;
-    updatedAt: Time;
-    category: string;
-}
-export interface ContactMessage {
-    id: string;
-    subject: string;
-    name: string;
-    email: string;
-    receivedAt: Time;
-    message: string;
+    publishedAt: Time;
 }
 export type Time = bigint;
-export interface ContactMessageInput {
-    subject: string;
-    name: string;
-    email: string;
-    message: string;
-}
 export interface _CaffeineStorageRefillInformation {
     proposed_top_up_amount?: bigint;
 }
-export interface Subscriber {
-    signupDate: Time;
-    email: string;
+export interface ServiceItem {
+    name: string;
+    description: string;
+    price: number;
 }
 export interface _CaffeineStorageCreateCertificateResult {
     method: string;
     blob_hash: string;
 }
+export interface GalleryItem {
+    title: string;
+    imageUrl: string;
+}
 export interface UserProfile {
     name: string;
 }
-export interface Testimonial {
-    id: string;
-    roleOrBusiness: string;
-    createdAt: Time;
-    authorName: string;
-    message: string;
-    rating: bigint;
+export interface _CaffeineStorageRefillResult {
+    success?: boolean;
+    topped_up_amount?: bigint;
 }
 export enum UserRole {
     admin = "admin",
@@ -154,38 +131,22 @@ export interface backendInterface {
     _caffeineStorageRefillCashier(refillInformation: _CaffeineStorageRefillInformation | null): Promise<_CaffeineStorageRefillResult>;
     _caffeineStorageUpdateGatewayPrincipals(): Promise<void>;
     _initializeAccessControlWithSecret(userSecret: string): Promise<void>;
-    /**
-     * / ****************** Newsletter Subscribers *******************
-     */
-    addSubscriber(email: string): Promise<void>;
+    addBlogPost(post: BlogPost): Promise<void>;
+    addGalleryItem(item: GalleryItem): Promise<void>;
+    addService(service: ServiceItem): Promise<void>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
-    /**
-     * / ****************** Blog Posts *******************
-     */
-    createOrUpdateBlogPost(post: BlogPost): Promise<void>;
-    /**
-     * / ****************** Testimonials *******************
-     */
-    createOrUpdateTestimonial(testimonial: Testimonial): Promise<void>;
-    deleteBlogPost(id: string): Promise<void>;
-    deleteTestimonial(id: string): Promise<void>;
-    getBlogPost(id: string): Promise<BlogPost>;
-    getBlogPosts(publishedOnly: boolean): Promise<Array<BlogPost>>;
+    getBlogPosts(): Promise<Array<BlogPost>>;
     /**
      * / ****************** User Profiles *******************
      */
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
-    getContactMessages(): Promise<Array<ContactMessage>>;
-    getSubscribers(): Promise<Array<Subscriber>>;
-    getTestimonials(): Promise<Array<Testimonial>>;
+    getGallery(): Promise<Array<GalleryItem>>;
+    getServices(): Promise<Array<ServiceItem>>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     isCallerAdmin(): Promise<boolean>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
-    /**
-     * / ****************** Contact Messages *******************
-     */
-    submitContactMessage(input: ContactMessageInput): Promise<void>;
+    updateService(service: ServiceItem): Promise<void>;
 }
 import type { UserProfile as _UserProfile, UserRole as _UserRole, _CaffeineStorageRefillInformation as __CaffeineStorageRefillInformation, _CaffeineStorageRefillResult as __CaffeineStorageRefillResult } from "./declarations/backend.did.d.ts";
 export class Backend implements backendInterface {
@@ -288,17 +249,45 @@ export class Backend implements backendInterface {
             return result;
         }
     }
-    async addSubscriber(arg0: string): Promise<void> {
+    async addBlogPost(arg0: BlogPost): Promise<void> {
         if (this.processError) {
             try {
-                const result = await this.actor.addSubscriber(arg0);
+                const result = await this.actor.addBlogPost(arg0);
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.addSubscriber(arg0);
+            const result = await this.actor.addBlogPost(arg0);
+            return result;
+        }
+    }
+    async addGalleryItem(arg0: GalleryItem): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.addGalleryItem(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.addGalleryItem(arg0);
+            return result;
+        }
+    }
+    async addService(arg0: ServiceItem): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.addService(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.addService(arg0);
             return result;
         }
     }
@@ -316,87 +305,17 @@ export class Backend implements backendInterface {
             return result;
         }
     }
-    async createOrUpdateBlogPost(arg0: BlogPost): Promise<void> {
+    async getBlogPosts(): Promise<Array<BlogPost>> {
         if (this.processError) {
             try {
-                const result = await this.actor.createOrUpdateBlogPost(arg0);
+                const result = await this.actor.getBlogPosts();
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.createOrUpdateBlogPost(arg0);
-            return result;
-        }
-    }
-    async createOrUpdateTestimonial(arg0: Testimonial): Promise<void> {
-        if (this.processError) {
-            try {
-                const result = await this.actor.createOrUpdateTestimonial(arg0);
-                return result;
-            } catch (e) {
-                this.processError(e);
-                throw new Error("unreachable");
-            }
-        } else {
-            const result = await this.actor.createOrUpdateTestimonial(arg0);
-            return result;
-        }
-    }
-    async deleteBlogPost(arg0: string): Promise<void> {
-        if (this.processError) {
-            try {
-                const result = await this.actor.deleteBlogPost(arg0);
-                return result;
-            } catch (e) {
-                this.processError(e);
-                throw new Error("unreachable");
-            }
-        } else {
-            const result = await this.actor.deleteBlogPost(arg0);
-            return result;
-        }
-    }
-    async deleteTestimonial(arg0: string): Promise<void> {
-        if (this.processError) {
-            try {
-                const result = await this.actor.deleteTestimonial(arg0);
-                return result;
-            } catch (e) {
-                this.processError(e);
-                throw new Error("unreachable");
-            }
-        } else {
-            const result = await this.actor.deleteTestimonial(arg0);
-            return result;
-        }
-    }
-    async getBlogPost(arg0: string): Promise<BlogPost> {
-        if (this.processError) {
-            try {
-                const result = await this.actor.getBlogPost(arg0);
-                return result;
-            } catch (e) {
-                this.processError(e);
-                throw new Error("unreachable");
-            }
-        } else {
-            const result = await this.actor.getBlogPost(arg0);
-            return result;
-        }
-    }
-    async getBlogPosts(arg0: boolean): Promise<Array<BlogPost>> {
-        if (this.processError) {
-            try {
-                const result = await this.actor.getBlogPosts(arg0);
-                return result;
-            } catch (e) {
-                this.processError(e);
-                throw new Error("unreachable");
-            }
-        } else {
-            const result = await this.actor.getBlogPosts(arg0);
+            const result = await this.actor.getBlogPosts();
             return result;
         }
     }
@@ -428,45 +347,31 @@ export class Backend implements backendInterface {
             return from_candid_UserRole_n11(this._uploadFile, this._downloadFile, result);
         }
     }
-    async getContactMessages(): Promise<Array<ContactMessage>> {
+    async getGallery(): Promise<Array<GalleryItem>> {
         if (this.processError) {
             try {
-                const result = await this.actor.getContactMessages();
+                const result = await this.actor.getGallery();
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.getContactMessages();
+            const result = await this.actor.getGallery();
             return result;
         }
     }
-    async getSubscribers(): Promise<Array<Subscriber>> {
+    async getServices(): Promise<Array<ServiceItem>> {
         if (this.processError) {
             try {
-                const result = await this.actor.getSubscribers();
+                const result = await this.actor.getServices();
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.getSubscribers();
-            return result;
-        }
-    }
-    async getTestimonials(): Promise<Array<Testimonial>> {
-        if (this.processError) {
-            try {
-                const result = await this.actor.getTestimonials();
-                return result;
-            } catch (e) {
-                this.processError(e);
-                throw new Error("unreachable");
-            }
-        } else {
-            const result = await this.actor.getTestimonials();
+            const result = await this.actor.getServices();
             return result;
         }
     }
@@ -512,17 +417,17 @@ export class Backend implements backendInterface {
             return result;
         }
     }
-    async submitContactMessage(arg0: ContactMessageInput): Promise<void> {
+    async updateService(arg0: ServiceItem): Promise<void> {
         if (this.processError) {
             try {
-                const result = await this.actor.submitContactMessage(arg0);
+                const result = await this.actor.updateService(arg0);
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.submitContactMessage(arg0);
+            const result = await this.actor.updateService(arg0);
             return result;
         }
     }

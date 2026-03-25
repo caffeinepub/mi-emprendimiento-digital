@@ -6,93 +6,31 @@ import Text "mo:core/Text";
 import Iter "mo:core/Iter";
 import Principal "mo:core/Principal";
 import Runtime "mo:core/Runtime";
+import Migration "migration";
 import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
 import MixinStorage "blob-storage/Mixin";
 
+(
+  with
+  migration = Migration.run;
+)
 actor {
-  type BlogPost = {
-    id : Text;
-    title : Text;
-    summary : Text;
-    content : Text;
-    category : Text;
-    coverImageURL : Text;
-    published : Bool;
-    createdAt : Time.Time;
-    updatedAt : Time.Time;
-  };
-
-  module BlogPost {
-    public func compare(post1 : BlogPost, post2 : BlogPost) : Order.Order {
-      Int.compare(post2.createdAt, post1.createdAt);
-    };
-  };
-
-  type Testimonial = {
-    id : Text;
-    authorName : Text;
-    roleOrBusiness : Text;
-    message : Text;
-    rating : Nat;
-    createdAt : Time.Time;
-  };
-
-  module Testimonial {
-    public func compare(t1 : Testimonial, t2 : Testimonial) : Order.Order {
-      Text.compare(t1.authorName, t2.authorName);
-    };
-  };
-
-  type Subscriber = {
-    email : Text;
-    signupDate : Time.Time;
-  };
-
-  module Subscriber {
-    public func compare(s1 : Subscriber, s2 : Subscriber) : Order.Order {
-      Text.compare(s1.email, s2.email);
-    };
-  };
-
-  type ContactMessage = {
-    id : Text;
-    name : Text;
-    email : Text;
-    subject : Text;
-    message : Text;
-    receivedAt : Time.Time;
-  };
-
-  type ContactMessageInput = {
-    name : Text;
-    email : Text;
-    subject : Text;
-    message : Text;
-  };
-
-  module ContactMessage {
-    public func compare(m1 : ContactMessage, m2 : ContactMessage) : Order.Order {
-      Int.compare(m2.receivedAt, m1.receivedAt);
-    };
-  };
-
-  type ServicePackage = {
-    id : Text;
+  type ServiceItem = {
     name : Text;
     description : Text;
     price : Float;
-    maintenancePrice : Float;
-    features : [Text];
-    isPopular : Bool;
-    active : Bool;
-    updatedAt : Time.Time;
   };
 
-  module ServicePackage {
-    public func compare(p1 : ServicePackage, p2 : ServicePackage) : Order.Order {
-      Float.compare(p1.price, p2.price);
-    };
+  type BlogPost = {
+    title : Text;
+    content : Text;
+    publishedAt : Time.Time;
+  };
+
+  type GalleryItem = {
+    title : Text;
+    imageUrl : Text;
   };
 
   public type UserProfile = {
@@ -100,17 +38,21 @@ actor {
   };
 
   // State
+  let services = Map.empty<Text, ServiceItem>();
   let blogPosts = Map.empty<Text, BlogPost>();
-  let testimonials = Map.empty<Text, Testimonial>();
-  let subscribers = Map.empty<Text, Subscriber>();
-  let contactMessages = Map.empty<Text, ContactMessage>();
+  let gallery = Map.empty<Text, GalleryItem>();
   let userProfiles = Map.empty<Principal, UserProfile>();
-  let servicePackages = Map.empty<Text, ServicePackage>();
 
   // Mixins
   let accessControlState = AccessControl.initState();
   include MixinAuthorization(accessControlState);
   include MixinStorage();
+
+  module ServiceItem {
+    public func compareByPrice(a : ServiceItem, b : ServiceItem) : Order.Order {
+      Float.compare(a.price, b.price);
+    };
+  };
 
   /******************** User Profiles ********************/
   public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
@@ -134,155 +76,50 @@ actor {
     userProfiles.add(caller, profile);
   };
 
-  /******************** Blog Posts ********************/
-  public shared ({ caller }) func createOrUpdateBlogPost(post : BlogPost) : async () {
-    if (not AccessControl.hasPermission(accessControlState, caller, #admin)) {
-      Runtime.trap("Unauthorized: Only admin can create or update blog posts");
+  // Services CRUD
+  public shared ({ caller }) func addService(service : ServiceItem) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admin can add services");
     };
-    let now = Time.now();
-    let updatedPost : BlogPost = {
-      post with
-      updatedAt = now;
-      createdAt = post.createdAt;
-    };
-    blogPosts.add(post.id, updatedPost);
+    if (services.containsKey(service.name)) { Runtime.trap("Service already exists") };
+    services.add(service.name, service);
   };
 
-  public query ({ caller }) func getBlogPosts(publishedOnly : Bool) : async [BlogPost] {
-    let isAdmin = AccessControl.isAdmin(accessControlState, caller);
-    if (not isAdmin and not publishedOnly) {
-      Runtime.trap("Unauthorized: Only admin can view unpublished posts");
+  public shared ({ caller }) func updateService(service : ServiceItem) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admin can update services");
     };
-
-    if (publishedOnly or not isAdmin) {
-      blogPosts.values().toArray().filter(func(post) { post.published }).sort();
-    } else {
-      blogPosts.values().toArray().sort();
-    };
+    if (not services.containsKey(service.name)) { Runtime.trap("Service not found") };
+    services.add(service.name, service);
   };
 
-  public query ({ caller }) func getBlogPost(id : Text) : async BlogPost {
-    switch (blogPosts.get(id)) {
-      case (null) { Runtime.trap("Blog post not found") };
-      case (?post) {
-        if (not post.published and not AccessControl.isAdmin(accessControlState, caller)) {
-          Runtime.trap("Unauthorized: Only admin can view unpublished posts");
-        };
-        post;
-      };
+  public query func getServices() : async [ServiceItem] {
+    services.values().toArray().sort(ServiceItem.compareByPrice);
+  };
+
+  // Blog CRUD
+  public shared ({ caller }) func addBlogPost(post : BlogPost) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admin can add blog posts");
     };
+    if (blogPosts.containsKey(post.title)) { Runtime.trap("Blog post already exists") };
+    blogPosts.add(post.title, post);
   };
 
-  public shared ({ caller }) func deleteBlogPost(id : Text) : async () {
-    if (not AccessControl.hasPermission(accessControlState, caller, #admin)) {
-      Runtime.trap("Unauthorized: Only admin can delete blog posts");
+  public query func getBlogPosts() : async [BlogPost] {
+    blogPosts.values().toArray();
+  };
+
+  // Gallery CRUD
+  public shared ({ caller }) func addGalleryItem(item : GalleryItem) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admin can add gallery items");
     };
-    blogPosts.remove(id);
+    if (gallery.containsKey(item.title)) { Runtime.trap("Gallery item already exists") };
+    gallery.add(item.title, item);
   };
 
-  /******************** Testimonials ********************/
-  public shared ({ caller }) func createOrUpdateTestimonial(testimonial : Testimonial) : async () {
-    if (not AccessControl.hasPermission(accessControlState, caller, #admin)) {
-      Runtime.trap("Unauthorized: Only admin can create or update testimonials");
-    };
-    testimonials.add(testimonial.id, testimonial);
-  };
-
-  public query ({ caller }) func getTestimonials() : async [Testimonial] {
-    testimonials.values().toArray().sort();
-  };
-
-  public shared ({ caller }) func deleteTestimonial(id : Text) : async () {
-    if (not AccessControl.hasPermission(accessControlState, caller, #admin)) {
-      Runtime.trap("Unauthorized: Only admin can delete testimonials");
-    };
-    testimonials.remove(id);
-  };
-
-  /******************** Newsletter Subscribers ********************/
-  public shared ({ caller }) func addSubscriber(email : Text) : async () {
-    if (not isValidEmail(email)) { Runtime.trap("Invalid email address") };
-    if (subscribers.containsKey(email)) { Runtime.trap("Email already subscribed") };
-    let subscriber : Subscriber = {
-      email;
-      signupDate = Time.now();
-    };
-    subscribers.add(email, subscriber);
-  };
-
-  public query ({ caller }) func getSubscribers() : async [Subscriber] {
-    if (not AccessControl.hasPermission(accessControlState, caller, #admin)) {
-      Runtime.trap("Unauthorized: Only admin can view subscribers");
-    };
-    subscribers.values().toArray().sort();
-  };
-
-  /******************** Contact Messages ********************/
-  public shared ({ caller }) func submitContactMessage(input : ContactMessageInput) : async () {
-    if (input.name.size() == 0 or not isValidEmail(input.email) or input.message.size() == 0 or input.subject.size() == 0) {
-      Runtime.trap("Invalid input data");
-    };
-    if (input.message.size() > 1000) {
-      Runtime.trap("Message must be less than 1000 characters");
-    };
-
-    let id = getNextId();
-    let contactMessage : ContactMessage = {
-      id;
-      name = input.name;
-      email = input.email;
-      subject = input.subject;
-      message = input.message;
-      receivedAt = Time.now();
-    };
-    contactMessages.add(id, contactMessage);
-  };
-
-  public query ({ caller }) func getContactMessages() : async [ContactMessage] {
-    if (not AccessControl.hasPermission(accessControlState, caller, #admin)) {
-      Runtime.trap("Unauthorized: Only admin can view contact messages");
-    };
-    contactMessages.values().toArray().sort();
-  };
-
-  /******************** Service Packages ********************/
-  public shared ({ caller }) func upsertServicePackage(pkg : ServicePackage) : async () {
-    if (not AccessControl.hasPermission(accessControlState, caller, #admin)) {
-      Runtime.trap("Unauthorized: Only admin can manage service packages");
-    };
-    let updated : ServicePackage = { pkg with updatedAt = Time.now() };
-    servicePackages.add(pkg.id, updated);
-  };
-
-  public query func getServicePackages() : async [ServicePackage] {
-    servicePackages.values().toArray().filter(func(p) { p.active }).sort();
-  };
-
-  public query ({ caller }) func getAllServicePackages() : async [ServicePackage] {
-    if (not AccessControl.hasPermission(accessControlState, caller, #admin)) {
-      Runtime.trap("Unauthorized: Only admin can view all packages");
-    };
-    servicePackages.values().toArray().sort();
-  };
-
-  public shared ({ caller }) func deleteServicePackage(id : Text) : async () {
-    if (not AccessControl.hasPermission(accessControlState, caller, #admin)) {
-      Runtime.trap("Unauthorized: Only admin can delete service packages");
-    };
-    servicePackages.remove(id);
-  };
-
-  /******************** Utils ********************/
-  func getNextId() : Text {
-    Time.now().toText();
-  };
-
-  func isValidEmail(email : Text) : Bool {
-    let parts = email.split(#char '@');
-    let partsArray = parts.toArray();
-    if (partsArray.size() != 2) { return false };
-    let domainParts = partsArray[1].split(#char '.').toArray();
-    if (domainParts.size() < 2) { return false };
-    true;
+  public query func getGallery() : async [GalleryItem] {
+    gallery.values().toArray();
   };
 };

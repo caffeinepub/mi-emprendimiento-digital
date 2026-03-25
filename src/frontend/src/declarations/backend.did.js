@@ -19,50 +19,27 @@ export const _CaffeineStorageRefillResult = IDL.Record({
   'success' : IDL.Opt(IDL.Bool),
   'topped_up_amount' : IDL.Opt(IDL.Nat),
 });
+export const Time = IDL.Int;
+export const BlogPost = IDL.Record({
+  'title' : IDL.Text,
+  'content' : IDL.Text,
+  'publishedAt' : Time,
+});
+export const GalleryItem = IDL.Record({
+  'title' : IDL.Text,
+  'imageUrl' : IDL.Text,
+});
+export const ServiceItem = IDL.Record({
+  'name' : IDL.Text,
+  'description' : IDL.Text,
+  'price' : IDL.Float64,
+});
 export const UserRole = IDL.Variant({
   'admin' : IDL.Null,
   'user' : IDL.Null,
   'guest' : IDL.Null,
 });
-export const Time = IDL.Int;
-export const BlogPost = IDL.Record({
-  'id' : IDL.Text,
-  'coverImageURL' : IDL.Text,
-  'title' : IDL.Text,
-  'content' : IDL.Text,
-  'published' : IDL.Bool,
-  'createdAt' : Time,
-  'summary' : IDL.Text,
-  'updatedAt' : Time,
-  'category' : IDL.Text,
-});
-export const Testimonial = IDL.Record({
-  'id' : IDL.Text,
-  'roleOrBusiness' : IDL.Text,
-  'createdAt' : Time,
-  'authorName' : IDL.Text,
-  'message' : IDL.Text,
-  'rating' : IDL.Nat,
-});
 export const UserProfile = IDL.Record({ 'name' : IDL.Text });
-export const ContactMessage = IDL.Record({
-  'id' : IDL.Text,
-  'subject' : IDL.Text,
-  'name' : IDL.Text,
-  'email' : IDL.Text,
-  'receivedAt' : Time,
-  'message' : IDL.Text,
-});
-export const Subscriber = IDL.Record({
-  'signupDate' : Time,
-  'email' : IDL.Text,
-});
-export const ContactMessageInput = IDL.Record({
-  'subject' : IDL.Text,
-  'name' : IDL.Text,
-  'email' : IDL.Text,
-  'message' : IDL.Text,
-});
 
 export const idlService = IDL.Service({
   '_caffeineStorageBlobIsLive' : IDL.Func(
@@ -92,19 +69,15 @@ export const idlService = IDL.Service({
     ),
   '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
   '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
-  'addSubscriber' : IDL.Func([IDL.Text], [], []),
+  'addBlogPost' : IDL.Func([BlogPost], [], []),
+  'addGalleryItem' : IDL.Func([GalleryItem], [], []),
+  'addService' : IDL.Func([ServiceItem], [], []),
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
-  'createOrUpdateBlogPost' : IDL.Func([BlogPost], [], []),
-  'createOrUpdateTestimonial' : IDL.Func([Testimonial], [], []),
-  'deleteBlogPost' : IDL.Func([IDL.Text], [], []),
-  'deleteTestimonial' : IDL.Func([IDL.Text], [], []),
-  'getBlogPost' : IDL.Func([IDL.Text], [BlogPost], ['query']),
-  'getBlogPosts' : IDL.Func([IDL.Bool], [IDL.Vec(BlogPost)], ['query']),
+  'getBlogPosts' : IDL.Func([], [IDL.Vec(BlogPost)], ['query']),
   'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
   'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
-  'getContactMessages' : IDL.Func([], [IDL.Vec(ContactMessage)], ['query']),
-  'getSubscribers' : IDL.Func([], [IDL.Vec(Subscriber)], ['query']),
-  'getTestimonials' : IDL.Func([], [IDL.Vec(Testimonial)], ['query']),
+  'getGallery' : IDL.Func([], [IDL.Vec(GalleryItem)], ['query']),
+  'getServices' : IDL.Func([], [IDL.Vec(ServiceItem)], ['query']),
   'getUserProfile' : IDL.Func(
       [IDL.Principal],
       [IDL.Opt(UserProfile)],
@@ -112,7 +85,7 @@ export const idlService = IDL.Service({
     ),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
-  'submitContactMessage' : IDL.Func([ContactMessageInput], [], []),
+  'updateService' : IDL.Func([ServiceItem], [], []),
 });
 
 export const idlInitArgs = [];
@@ -129,47 +102,24 @@ export const idlFactory = ({ IDL }) => {
     'success' : IDL.Opt(IDL.Bool),
     'topped_up_amount' : IDL.Opt(IDL.Nat),
   });
+  const Time = IDL.Int;
+  const BlogPost = IDL.Record({
+    'title' : IDL.Text,
+    'content' : IDL.Text,
+    'publishedAt' : Time,
+  });
+  const GalleryItem = IDL.Record({ 'title' : IDL.Text, 'imageUrl' : IDL.Text });
+  const ServiceItem = IDL.Record({
+    'name' : IDL.Text,
+    'description' : IDL.Text,
+    'price' : IDL.Float64,
+  });
   const UserRole = IDL.Variant({
     'admin' : IDL.Null,
     'user' : IDL.Null,
     'guest' : IDL.Null,
   });
-  const Time = IDL.Int;
-  const BlogPost = IDL.Record({
-    'id' : IDL.Text,
-    'coverImageURL' : IDL.Text,
-    'title' : IDL.Text,
-    'content' : IDL.Text,
-    'published' : IDL.Bool,
-    'createdAt' : Time,
-    'summary' : IDL.Text,
-    'updatedAt' : Time,
-    'category' : IDL.Text,
-  });
-  const Testimonial = IDL.Record({
-    'id' : IDL.Text,
-    'roleOrBusiness' : IDL.Text,
-    'createdAt' : Time,
-    'authorName' : IDL.Text,
-    'message' : IDL.Text,
-    'rating' : IDL.Nat,
-  });
   const UserProfile = IDL.Record({ 'name' : IDL.Text });
-  const ContactMessage = IDL.Record({
-    'id' : IDL.Text,
-    'subject' : IDL.Text,
-    'name' : IDL.Text,
-    'email' : IDL.Text,
-    'receivedAt' : Time,
-    'message' : IDL.Text,
-  });
-  const Subscriber = IDL.Record({ 'signupDate' : Time, 'email' : IDL.Text });
-  const ContactMessageInput = IDL.Record({
-    'subject' : IDL.Text,
-    'name' : IDL.Text,
-    'email' : IDL.Text,
-    'message' : IDL.Text,
-  });
   
   return IDL.Service({
     '_caffeineStorageBlobIsLive' : IDL.Func(
@@ -199,19 +149,15 @@ export const idlFactory = ({ IDL }) => {
       ),
     '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
     '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
-    'addSubscriber' : IDL.Func([IDL.Text], [], []),
+    'addBlogPost' : IDL.Func([BlogPost], [], []),
+    'addGalleryItem' : IDL.Func([GalleryItem], [], []),
+    'addService' : IDL.Func([ServiceItem], [], []),
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
-    'createOrUpdateBlogPost' : IDL.Func([BlogPost], [], []),
-    'createOrUpdateTestimonial' : IDL.Func([Testimonial], [], []),
-    'deleteBlogPost' : IDL.Func([IDL.Text], [], []),
-    'deleteTestimonial' : IDL.Func([IDL.Text], [], []),
-    'getBlogPost' : IDL.Func([IDL.Text], [BlogPost], ['query']),
-    'getBlogPosts' : IDL.Func([IDL.Bool], [IDL.Vec(BlogPost)], ['query']),
+    'getBlogPosts' : IDL.Func([], [IDL.Vec(BlogPost)], ['query']),
     'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
     'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
-    'getContactMessages' : IDL.Func([], [IDL.Vec(ContactMessage)], ['query']),
-    'getSubscribers' : IDL.Func([], [IDL.Vec(Subscriber)], ['query']),
-    'getTestimonials' : IDL.Func([], [IDL.Vec(Testimonial)], ['query']),
+    'getGallery' : IDL.Func([], [IDL.Vec(GalleryItem)], ['query']),
+    'getServices' : IDL.Func([], [IDL.Vec(ServiceItem)], ['query']),
     'getUserProfile' : IDL.Func(
         [IDL.Principal],
         [IDL.Opt(UserProfile)],
@@ -219,7 +165,7 @@ export const idlFactory = ({ IDL }) => {
       ),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
-    'submitContactMessage' : IDL.Func([ContactMessageInput], [], []),
+    'updateService' : IDL.Func([ServiceItem], [], []),
   });
 };
 

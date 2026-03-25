@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Open+Sans:wght@400;500;600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -8,80 +8,44 @@
   :root {
     --radius: 0.5rem;
 
-    /* Navy #0F2E4A → oklch(0.22 0.068 240) */
-    --navy: 0.22 0.068 240;
-    /* Orange #D27B3A → oklch(0.62 0.13 50) */
-    --orange: 0.62 0.13 50;
-    /* Teal #1F8A9B → oklch(0.54 0.085 200) */
-    --teal: 0.54 0.085 200;
-
-    --background: 1 0 0;
-    --foreground: 0.18 0.05 240;
-    --card: 1 0 0;
-    --card-foreground: 0.18 0.05 240;
-    --popover: 1 0 0;
-    --popover-foreground: 0.18 0.05 240;
-    --primary: 0.22 0.068 240;
-    --primary-foreground: 1 0 0;
-    --secondary: 0.54 0.085 200;
+    /* Barbershop dark theme - near-black charcoal */
+    --background: 0.09 0.004 265;
+    --foreground: 1 0 0;
+    --card: 0.17 0.004 265;
+    --card-foreground: 1 0 0;
+    --popover: 0.17 0.004 265;
+    --popover-foreground: 1 0 0;
+    /* Gold accent #C9A15A */
+    --primary: 0.72 0.1 75;
+    --primary-foreground: 0.09 0.004 265;
+    /* Dark card variant #2B2C30 */
+    --secondary: 0.21 0.004 265;
     --secondary-foreground: 1 0 0;
-    --muted: 0.96 0.005 240;
-    --muted-foreground: 0.44 0.02 220;
-    --accent: 0.62 0.13 50;
-    --accent-foreground: 1 0 0;
+    /* Muted light gray text #C9CCD1 */
+    --muted: 0.17 0.004 265;
+    --muted-foreground: 0.82 0.005 265;
+    /* Gold accent */
+    --accent: 0.72 0.1 75;
+    --accent-foreground: 0.09 0.004 265;
     --destructive: 0.577 0.245 27.325;
     --destructive-foreground: 0.985 0 0;
-    --border: 0.9 0.01 240;
-    --input: 0.9 0.01 240;
-    --ring: 0.54 0.085 200;
-    --chart-1: 0.62 0.13 50;
+    /* Border #3A3C41 */
+    --border: 0.27 0.005 265;
+    --input: 0.27 0.005 265;
+    --ring: 0.72 0.1 75;
+    --chart-1: 0.72 0.1 75;
     --chart-2: 0.54 0.085 200;
-    --chart-3: 0.22 0.068 240;
+    --chart-3: 0.82 0.005 265;
     --chart-4: 0.828 0.189 84.429;
     --chart-5: 0.769 0.188 70.08;
-    --sidebar: 0.22 0.068 240;
+    --sidebar: 0.12 0.004 265;
     --sidebar-foreground: 1 0 0;
-    --sidebar-primary: 0.62 0.13 50;
-    --sidebar-primary-foreground: 1 0 0;
-    --sidebar-accent: 0.54 0.085 200;
+    --sidebar-primary: 0.72 0.1 75;
+    --sidebar-primary-foreground: 0.09 0.004 265;
+    --sidebar-accent: 0.21 0.004 265;
     --sidebar-accent-foreground: 1 0 0;
-    --sidebar-border: 0.3 0.05 240;
-    --sidebar-ring: 0.54 0.085 200;
-  }
-
-  .dark {
-    --background: 0.22 0.068 240;
-    --foreground: 0.985 0 0;
-    --card: 0.28 0.06 240;
-    --card-foreground: 0.985 0 0;
-    --popover: 0.28 0.06 240;
-    --popover-foreground: 0.985 0 0;
-    --primary: 0.62 0.13 50;
-    --primary-foreground: 1 0 0;
-    --secondary: 0.54 0.085 200;
-    --secondary-foreground: 1 0 0;
-    --muted: 0.3 0.05 240;
-    --muted-foreground: 0.7 0.02 220;
-    --accent: 0.62 0.13 50;
-    --accent-foreground: 1 0 0;
-    --destructive: 0.704 0.191 22.216;
-    --destructive-foreground: 0.985 0 0;
-    --border: 1 0 0 / 10%;
-    --input: 1 0 0 / 15%;
-    --ring: 0.54 0.085 200;
-    --chart-1: 0.62 0.13 50;
-    --chart-2: 0.54 0.085 200;
-    --chart-3: 0.488 0.243 264.376;
-    --chart-4: 0.627 0.265 303.9;
-    --chart-5: 0.645 0.246 16.439;
-    --sidebar: 0.18 0.06 240;
-    --sidebar-foreground: 0.985 0 0;
-    --sidebar-primary: 0.62 0.13 50;
-    --sidebar-primary-foreground: 1 0 0;
-    --sidebar-accent: 0.54 0.085 200;
-    --sidebar-accent-foreground: 1 0 0;
-    --sidebar-border: 1 0 0 / 10%;
-    --sidebar-ring: 0.54 0.085 200;
+    --sidebar-border: 0.27 0.005 265;
+    --sidebar-ring: 0.72 0.1 75;
   }
 
   * {
@@ -89,7 +53,7 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-family: "Open Sans", sans-serif;
+    font-family: "Inter", sans-serif;
   }
   h1,
   h2,
@@ -98,5 +62,9 @@
   h5,
   h6 {
     font-family: "Montserrat", sans-serif;
+  }
+
+  html {
+    scroll-behavior: smooth;
   }
 }

@@ -1,74 +1,38 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { BlogPost, ContactMessageInput, Testimonial } from "../backend.d";
+import type { BlogPost, ServiceItem } from "../backend.d";
 import { useActor } from "./useActor";
 
-export function useGetPublishedPosts() {
+export function useGetBlogPosts() {
   const { actor, isFetching } = useActor();
   return useQuery({
-    queryKey: ["posts", "published"],
+    queryKey: ["blogPosts"],
     queryFn: async () => {
       if (!actor) return [];
-      return actor.getBlogPosts(true);
+      return actor.getBlogPosts();
     },
     enabled: !!actor && !isFetching,
   });
 }
 
-export function useGetAllPosts() {
+export function useGetServices() {
   const { actor, isFetching } = useActor();
   return useQuery({
-    queryKey: ["posts", "all"],
+    queryKey: ["services"],
     queryFn: async () => {
       if (!actor) return [];
-      return actor.getBlogPosts(false);
+      return actor.getServices();
     },
     enabled: !!actor && !isFetching,
   });
 }
 
-export function useGetBlogPost(id: string) {
+export function useGetGallery() {
   const { actor, isFetching } = useActor();
   return useQuery({
-    queryKey: ["post", id],
-    queryFn: async () => {
-      if (!actor) return null;
-      return actor.getBlogPost(id);
-    },
-    enabled: !!actor && !isFetching && !!id,
-  });
-}
-
-export function useGetTestimonials() {
-  const { actor, isFetching } = useActor();
-  return useQuery({
-    queryKey: ["testimonials"],
+    queryKey: ["gallery"],
     queryFn: async () => {
       if (!actor) return [];
-      return actor.getTestimonials();
-    },
-    enabled: !!actor && !isFetching,
-  });
-}
-
-export function useGetContactMessages() {
-  const { actor, isFetching } = useActor();
-  return useQuery({
-    queryKey: ["contactMessages"],
-    queryFn: async () => {
-      if (!actor) return [];
-      return actor.getContactMessages();
-    },
-    enabled: !!actor && !isFetching,
-  });
-}
-
-export function useGetSubscribers() {
-  const { actor, isFetching } = useActor();
-  return useQuery({
-    queryKey: ["subscribers"],
-    queryFn: async () => {
-      if (!actor) return [];
-      return actor.getSubscribers();
+      return actor.getGallery();
     },
     enabled: !!actor && !isFetching,
   });
@@ -86,78 +50,44 @@ export function useIsAdmin() {
   });
 }
 
-export function useSubmitContact() {
-  const { actor } = useActor();
-  return useMutation({
-    mutationFn: async (input: ContactMessageInput) => {
-      if (!actor) throw new Error("Actor no disponible");
-      return actor.submitContactMessage(input);
-    },
-  });
-}
-
-export function useAddSubscriber() {
-  const { actor } = useActor();
-  return useMutation({
-    mutationFn: async (email: string) => {
-      if (!actor) throw new Error("Actor no disponible");
-      return actor.addSubscriber(email);
-    },
-  });
-}
-
-export function useCreateOrUpdatePost() {
+export function useAddBlogPost() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (post: BlogPost) => {
       if (!actor) throw new Error("Actor no disponible");
-      return actor.createOrUpdateBlogPost(post);
+      return actor.addBlogPost(post);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["posts"] });
+      queryClient.invalidateQueries({ queryKey: ["blogPosts"] });
     },
   });
 }
 
-export function useDeletePost() {
+export function useAddService() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (id: string) => {
+    mutationFn: async (service: ServiceItem) => {
       if (!actor) throw new Error("Actor no disponible");
-      return actor.deleteBlogPost(id);
+      return actor.addService(service);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["posts"] });
+      queryClient.invalidateQueries({ queryKey: ["services"] });
     },
   });
 }
 
-export function useCreateOrUpdateTestimonial() {
+export function useUpdateService() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (testimonial: Testimonial) => {
+    mutationFn: async (service: ServiceItem) => {
       if (!actor) throw new Error("Actor no disponible");
-      return actor.createOrUpdateTestimonial(testimonial);
+      return actor.updateService(service);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["testimonials"] });
-    },
-  });
-}
-
-export function useDeleteTestimonial() {
-  const { actor } = useActor();
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async (id: string) => {
-      if (!actor) throw new Error("Actor no disponible");
-      return actor.deleteTestimonial(id);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["testimonials"] });
+      queryClient.invalidateQueries({ queryKey: ["services"] });
     },
   });
 }

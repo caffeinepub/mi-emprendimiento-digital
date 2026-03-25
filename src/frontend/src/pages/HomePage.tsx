@@ -1,721 +1,432 @@
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
-import { usePackages } from "@/hooks/usePackages";
-import {
-  useGetPublishedPosts,
-  useGetTestimonials,
-  useSubmitContact,
-} from "@/hooks/useQueries";
+import { useGetBlogPosts, useGetServices } from "@/hooks/useQueries";
 import { Link } from "@tanstack/react-router";
-import {
-  ArrowRight,
-  Check,
-  Globe,
-  MessageCircle,
-  Star,
-  Users,
-  Zap,
-} from "lucide-react";
+import { ChevronRight, MapPin, Scissors, Star } from "lucide-react";
 import { motion } from "motion/react";
-import { useState } from "react";
-import { toast } from "sonner";
 
-const SAMPLE_TESTIMONIALS = [
+const SAMPLE_SERVICES = [
   {
-    id: "t1",
-    authorName: "María González",
-    roleOrBusiness: "Dueña de Panadería La Dulce",
-    message:
-      "Gracias a Crear y Crecer, mi panadería ahora tiene clientes de todo el vecindario que nos encuentran en Google. ¡Mis ventas aumentaron un 40%!",
-    rating: BigInt(5),
-    createdAt: BigInt(0),
+    name: "Corte Básico",
+    description: "Corte clásico con tijera y máquina",
+    price: 5,
   },
   {
-    id: "t2",
-    authorName: "Carlos Ramírez",
-    roleOrBusiness: "Creador de Contenido de Cocina",
-    message:
-      "Tenía seguidores en Instagram pero no sabía cómo monetizar. Ahora tengo mi propia página y vendo mis recetas digitales desde casa. ¡Increíble!",
-    rating: BigInt(5),
-    createdAt: BigInt(0),
+    name: "Corte + Barba",
+    description: "Servicio completo de corte y arreglo de barba",
+    price: 8,
   },
   {
-    id: "t3",
-    authorName: "Sofía Martínez",
-    roleOrBusiness: "Estilista & Influencer",
-    message:
-      "Profesionalismo total. En menos de una semana tenía mi portafolio online y ya recibo consultas de todo el país. ¡Definitivamente lo recomiendo!",
-    rating: BigInt(5),
-    createdAt: BigInt(0),
+    name: "Fade / Degradado",
+    description: "Degradado moderno skin fade o drop fade",
+    price: 7,
+  },
+  {
+    name: "Arreglo de Barba",
+    description: "Perfilado y arreglo de barba solamente",
+    price: 4,
+  },
+  {
+    name: "Corte a Domicilio",
+    description: "Voy hasta donde estés en Caracas",
+    price: 3,
   },
 ];
 
-const SAMPLE_POSTS = [
+const GALLERY_PHOTOS = [
   {
-    id: "p1",
-    title: "5 Razones por las que tu Negocio Necesita un Sitio Web",
-    summary:
-      "En el mundo digital de hoy, no tener presencia online es perder clientes. Descubre por qué un sitio web es la mejor inversión para tu negocio local.",
-    coverImageURL: "/assets/generated/blog-negocios.dim_800x500.jpg",
-    category: "negocios",
-    published: true,
-    createdAt: BigInt(Date.now() * 1_000_000),
-    content: "",
-    updatedAt: BigInt(0),
+    src: "/assets/generated/corte1.dim_400x400.jpg",
+    label: "Fade Clásico",
   },
   {
-    id: "p2",
-    title: "Cómo Monetizar tu Contenido y Ganar Dinero desde Casa",
-    summary:
-      "Ser creador de contenido es más que publicar fotos bonitas. Aprende las estrategias que usan los mejores para convertir seguidores en ingresos reales.",
-    coverImageURL: "/assets/generated/blog-creadores.dim_800x500.jpg",
-    category: "creadores",
-    published: true,
-    createdAt: BigInt(Date.now() * 1_000_000),
-    content: "",
-    updatedAt: BigInt(0),
+    src: "/assets/generated/corte2.dim_400x400.jpg",
+    label: "Corte + Barba",
   },
   {
-    id: "p3",
-    title: "Diseño Web Profesional: La Diferencia entre un Cliente y una Venta",
-    summary:
-      "Un buen diseño web no es solo estética. Es la diferencia entre que un visitante se vaya o compre. Te mostramos qué elementos son clave.",
-    coverImageURL: "/assets/generated/blog-web.dim_800x500.jpg",
-    category: "negocios",
-    published: true,
-    createdAt: BigInt(Date.now() * 1_000_000),
-    content: "",
-    updatedAt: BigInt(0),
+    src: "/assets/generated/corte3.dim_400x400.jpg",
+    label: "Degradado Moderno",
+  },
+  {
+    src: "/assets/generated/corte4.dim_400x400.jpg",
+    label: "Skin Fade",
   },
 ];
 
-const scrollTo = (id: string) => {
-  document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
-};
-
-const WA_NUMBER = "5804125828010";
+const SAMPLE_BLOG = [
+  {
+    title: "5 Estilos de Corte que están de moda en Caracas",
+    content:
+      "El fade, el drop fade, el buzz cut y el undercut son los cortes más pedidos en las barberías de Caracas este año. Descubre cuál es el ideal para ti según tu tipo de cara y estilo de vida.",
+    publishedAt: BigInt(0),
+  },
+  {
+    title: "Cómo mantener tu barba en casa",
+    content:
+      "Mantener una barba bien arreglada no requiere ir todos los días a la barbería. Con los productos correctos y algunos trucos básicos, puedes mantener tu barba perfecta entre visitas.",
+    publishedAt: BigInt(0),
+  },
+];
 
 export default function HomePage() {
-  const { data: posts } = useGetPublishedPosts();
-  const { data: testimonials } = useGetTestimonials();
-  const { mutateAsync: submitContact, isPending: isSubmitting } =
-    useSubmitContact();
-  const { activePackages } = usePackages();
+  const { data: services } = useGetServices();
+  const { data: posts } = useGetBlogPosts();
 
-  const displayPosts = (posts && posts.length > 0 ? posts : SAMPLE_POSTS).slice(
-    0,
-    3,
-  );
-  const displayTestimonials =
-    testimonials && testimonials.length > 0
-      ? testimonials
-      : SAMPLE_TESTIMONIALS;
-
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    subject: "",
-    message: "",
-  });
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      await submitContact(form);
-      toast.success("¡Mensaje enviado! Te contactaremos pronto.");
-      setForm({ name: "", email: "", subject: "", message: "" });
-    } catch {
-      toast.error("Error al enviar. Por favor intente de nuevo.");
-    }
-  };
-
-  const formatDate = (t: bigint) => {
-    const ms = Number(t) / 1_000_000;
-    if (!ms || ms < 1000) return "";
-    return new Date(ms).toLocaleDateString("es-ES", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-  };
-
-  const getWhatsAppLink = (packageName: string) => {
-    const msg = encodeURIComponent(
-      `Hola Luz! Me interesa el paquete ${packageName}. ¿Puedes darme más información?`,
-    );
-    return `https://wa.me/${WA_NUMBER}?text=${msg}`;
-  };
+  const displayServices =
+    services && services.length > 0 ? services : SAMPLE_SERVICES;
+  const displayPosts = posts && posts.length > 0 ? posts : SAMPLE_BLOG;
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
 
-      {/* Hero Section */}
+      {/* HERO */}
       <section
-        id="inicio"
-        className="relative min-h-screen flex items-center overflow-hidden"
+        className="relative min-h-screen flex items-center justify-center text-center"
+        style={{
+          backgroundImage:
+            "url('/assets/generated/barberia-hero.dim_1200x600.jpg')",
+        }}
       >
+        <div className="absolute inset-0 bg-background/80" />
         <div
-          className="absolute inset-0 bg-cover bg-center"
+          className="absolute inset-0 opacity-5"
           style={{
             backgroundImage:
-              "url('/assets/generated/hero-bg.dim_1920x1080.jpg')",
+              "repeating-linear-gradient(0deg,transparent,transparent 49px,rgba(201,161,90,0.8) 49px,rgba(201,161,90,0.8) 50px),repeating-linear-gradient(90deg,transparent,transparent 49px,rgba(201,161,90,0.8) 49px,rgba(201,161,90,0.8) 50px)",
           }}
         />
-        <div className="absolute inset-0 bg-navy/80" />
 
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pt-24 pb-16">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <motion.div
-              initial={{ opacity: 0, x: -40 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.7 }}
-            >
-              <span className="inline-block bg-orange/20 text-orange text-xs font-semibold px-4 py-1.5 rounded-full mb-4 tracking-wider uppercase">
-                Diseño Web Profesional
-              </span>
-              <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-extrabold text-white leading-tight mb-6">
-                Diseño Web
-                <span className="text-orange block">Profesional</span>
-                para tu Negocio
-              </h1>
-              <p className="text-white/70 text-lg leading-relaxed mb-8 max-w-xl">
-                Ayudamos a negocios locales y creadores de contenido a
-                establecer su presencia digital. Sin complicaciones. Con
-                resultados reales. Gana clientes y genera ingresos desde casa.
-              </p>
-              <div className="flex flex-wrap gap-4">
-                <button
-                  type="button"
-                  onClick={() => scrollTo("precios")}
-                  className="bg-orange text-white font-heading font-bold px-8 py-4 rounded-full hover:bg-orange/90 transition-all flex items-center gap-2 text-sm"
-                  data-ocid="hero.primary_button"
-                >
-                  Ver Paquetes y Precios <ArrowRight className="w-4 h-4" />
-                </button>
-                <Link
-                  to="/blog"
-                  className="border-2 border-white/30 text-white font-semibold px-8 py-4 rounded-full hover:border-teal hover:text-teal transition-all text-sm"
-                  data-ocid="hero.secondary_button"
-                >
-                  Ver Blog
-                </Link>
-              </div>
-              <div className="flex gap-8 mt-10">
-                <div className="text-center">
-                  <p className="font-heading font-extrabold text-3xl text-orange">
-                    50+
-                  </p>
-                  <p className="text-white/50 text-xs">Clientes Felices</p>
-                </div>
-                <div className="text-center">
-                  <p className="font-heading font-extrabold text-3xl text-orange">
-                    100%
-                  </p>
-                  <p className="text-white/50 text-xs">Online & Desde Casa</p>
-                </div>
-                <div className="text-center">
-                  <p className="font-heading font-extrabold text-3xl text-orange">
-                    5★
-                  </p>
-                  <p className="text-white/50 text-xs">Calificación</p>
-                </div>
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: 40 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.7, delay: 0.2 }}
-              className="hidden lg:block"
-            >
-              <div className="relative">
-                <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-6 border border-white/20">
-                  <div className="grid grid-cols-2 gap-3">
-                    {[
-                      {
-                        icon: <Globe className="w-5 h-5" />,
-                        label: "Sitio Web",
-                        desc: "Presencia profesional",
-                      },
-                      {
-                        icon: <Star className="w-5 h-5" />,
-                        label: "Blog",
-                        desc: "Contenido de valor",
-                      },
-                      {
-                        icon: <Users className="w-5 h-5" />,
-                        label: "Clientes",
-                        desc: "Más conversiones",
-                      },
-                      {
-                        icon: <Zap className="w-5 h-5" />,
-                        label: "Rápido",
-                        desc: "Entrega en días",
-                      },
-                    ].map((item) => (
-                      <div
-                        key={item.label}
-                        className="bg-white/10 rounded-2xl p-4 border border-white/10"
-                      >
-                        <div className="text-teal mb-2">{item.icon}</div>
-                        <p className="text-white font-semibold text-sm">
-                          {item.label}
-                        </p>
-                        <p className="text-white/50 text-xs">{item.desc}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* Services Section */}
-      <section id="servicios" className="py-24 bg-muted/30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="relative z-10 max-w-4xl mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
           >
-            <span className="inline-block bg-teal/10 text-teal text-xs font-semibold px-4 py-1.5 rounded-full mb-4 tracking-wider uppercase">
-              Servicios
-            </span>
-            <h2 className="font-heading font-extrabold text-3xl md:text-4xl text-foreground">
-              ¿Qué puedo crear para ti?
-            </h2>
-          </motion.div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            {[
-              {
-                icon: <Globe className="w-7 h-7" />,
-                title: "Sitio Web Profesional",
-                desc: "Tu negocio con presencia digital elegante, rápida y accesible desde cualquier dispositivo.",
-              },
-              {
-                icon: <Star className="w-7 h-7" />,
-                title: "Blog de Contenido",
-                desc: "Comparte tu conocimiento, atrae audiencia y posiciona tu marca con artículos de valor.",
-              },
-              {
-                icon: <Users className="w-7 h-7" />,
-                title: "Catálogo de Productos",
-                desc: "Muestra lo que vendes con fotos, descripciones y un botón de contacto directo por WhatsApp.",
-              },
-            ].map((service, i) => (
-              <motion.div
-                key={service.title}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="bg-white rounded-2xl p-8 border border-border shadow-card hover:shadow-card-hover transition-shadow"
-              >
-                <div className="w-14 h-14 rounded-2xl bg-navy/5 flex items-center justify-center text-navy mb-6">
-                  {service.icon}
-                </div>
-                <h3 className="font-heading font-bold text-lg text-foreground mb-3">
-                  {service.title}
-                </h3>
-                <p className="text-muted-foreground text-sm leading-relaxed">
-                  {service.desc}
-                </p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Blog Section */}
-      <section id="blog" className="py-24 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="flex items-end justify-between mb-12"
-          >
-            <div>
-              <span className="inline-block bg-orange/10 text-orange text-xs font-semibold px-4 py-1.5 rounded-full mb-4 tracking-wider uppercase">
-                Blog
+            <div className="flex items-center justify-center gap-3 mb-6">
+              <div className="h-px w-12 bg-primary" />
+              <span className="text-primary text-xs font-bold tracking-[0.3em]">
+                CARACAS, VENEZUELA
               </span>
-              <h2 className="font-heading font-extrabold text-3xl md:text-4xl text-foreground">
-                Aprende y Crece
-              </h2>
+              <div className="h-px w-12 bg-primary" />
             </div>
-            <Link
-              to="/blog"
-              className="hidden sm:flex items-center gap-2 text-sm font-semibold text-navy hover:text-orange transition-colors"
-              data-ocid="blog.link"
-            >
-              Ver todos <ArrowRight className="w-4 h-4" />
-            </Link>
+            <h1 className="font-heading text-5xl md:text-7xl font-black text-foreground uppercase leading-tight mb-4">
+              BARBERÍA
+              <br />
+              <span className="text-primary">PROFESIONAL</span>
+            </h1>
+            <p className="text-muted-foreground text-lg md:text-xl mb-8 max-w-xl mx-auto">
+              Cortes de calidad en Caracas · A domicilio y en casa
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <button
+                type="button"
+                onClick={() =>
+                  document
+                    .getElementById("servicios")
+                    ?.scrollIntoView({ behavior: "smooth" })
+                }
+                className="bg-primary text-primary-foreground px-8 py-4 rounded font-bold tracking-widest text-sm uppercase hover:opacity-90 transition-opacity"
+                data-ocid="hero.primary_button"
+              >
+                VER SERVICIOS
+              </button>
+              <a
+                href="https://wa.me/5804125828010?text=Hola!%20Vi%20tu%20página%20y%20me%20interesa%20un%20corte%20💈"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="border border-primary text-primary px-8 py-4 rounded font-bold tracking-widest text-sm uppercase hover:bg-primary hover:text-primary-foreground transition-all"
+                data-ocid="hero.secondary_button"
+              >
+                CONTÁCTAME
+              </a>
+            </div>
           </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            {displayPosts.map((post, i) => (
-              <motion.div
-                key={post.id}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-              >
-                <Link
-                  to="/blog/$id"
-                  params={{ id: post.id }}
-                  className="group block bg-white rounded-2xl overflow-hidden border border-border shadow-card hover:shadow-card-hover transition-all"
-                  data-ocid={`blog.item.${i + 1}`}
-                >
-                  {post.coverImageURL && (
-                    <div className="aspect-video overflow-hidden">
-                      <img
-                        src={post.coverImageURL}
-                        alt={post.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                    </div>
-                  )}
-                  <div className="p-6">
-                    <span className="text-xs font-semibold text-teal bg-teal/10 px-3 py-1 rounded-full capitalize">
-                      {post.category}
-                    </span>
-                    <h3 className="font-heading font-bold text-base text-foreground mt-3 mb-2 group-hover:text-navy transition-colors">
-                      {post.title}
-                    </h3>
-                    <p className="text-sm text-muted-foreground line-clamp-2">
-                      {post.summary}
-                    </p>
-                    {formatDate(post.createdAt) && (
-                      <p className="text-xs text-muted-foreground mt-3">
-                        {formatDate(post.createdAt)}
-                      </p>
-                    )}
-                  </div>
-                </Link>
-              </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5, duration: 0.6 }}
+            className="mt-16 grid grid-cols-3 gap-6 border-t border-border/50 pt-8"
+          >
+            {[
+              { value: "100+", label: "Clientes Satisfechos" },
+              { value: "2+", label: "Años de Experiencia" },
+              { value: "5★", label: "Calificación" },
+            ].map((stat) => (
+              <div key={stat.label} className="text-center">
+                <div className="font-heading text-2xl font-black text-primary">
+                  {stat.value}
+                </div>
+                <div className="text-muted-foreground text-xs mt-1">
+                  {stat.label}
+                </div>
+              </div>
             ))}
-          </div>
+          </motion.div>
         </div>
+
+        <motion.div
+          animate={{ y: [0, 10, 0] }}
+          transition={{ repeat: Number.POSITIVE_INFINITY, duration: 2 }}
+          className="absolute bottom-8 left-1/2 -translate-x-1/2"
+        >
+          <div className="w-6 h-10 border-2 border-primary/40 rounded-full flex justify-center pt-2">
+            <div className="w-1 h-2 bg-primary rounded-full" />
+          </div>
+        </motion.div>
       </section>
 
-      {/* Testimonials Section */}
-      <section id="testimonios" className="py-24 bg-navy">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* SERVICIOS */}
+      <section id="servicios" className="py-20 px-4">
+        <div className="max-w-6xl mx-auto">
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             className="text-center mb-12"
           >
-            <span className="inline-block bg-white/10 text-white text-xs font-semibold px-4 py-1.5 rounded-full mb-4 tracking-wider uppercase">
-              Testimonios
-            </span>
-            <h2 className="font-heading font-extrabold text-3xl md:text-4xl text-white">
-              Lo que dicen mis clientes
+            <div className="flex items-center justify-center gap-3 mb-4">
+              <div className="h-px w-10 bg-primary" />
+              <span className="text-primary text-xs font-bold tracking-[0.3em]">
+                LO QUE OFREZCO
+              </span>
+              <div className="h-px w-10 bg-primary" />
+            </div>
+            <h2 className="font-heading text-4xl font-black text-foreground uppercase">
+              SERVICIOS
             </h2>
           </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-6">
-            {displayTestimonials.map((t, i) => (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {displayServices.map((service, i) => (
               <motion.div
-                key={t.id}
-                initial={{ opacity: 0, y: 30 }}
+                key={service.name}
+                initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1 }}
-                className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/10"
+                className="bg-card border border-border rounded-lg p-6 hover:border-primary/50 transition-colors"
+                data-ocid={`services.item.${i + 1}`}
               >
-                <div className="flex gap-1 mb-4">
-                  {Array.from({ length: Number(t.rating) }, (_, si) => si).map(
-                    (si) => (
-                      <Star
-                        // biome-ignore lint/suspicious/noArrayIndexKey: star icons are all identical
-                        key={si}
-                        className="w-4 h-4 fill-orange text-orange"
-                      />
-                    ),
-                  )}
+                <div className="flex items-start justify-between mb-3">
+                  <Scissors className="w-6 h-6 text-primary flex-shrink-0" />
+                  <span className="font-heading font-black text-xl text-primary">
+                    ${service.price}
+                  </span>
                 </div>
-                <p className="text-white/80 text-sm leading-relaxed mb-4">
-                  "{t.message}"
+                <h3 className="font-heading font-bold text-foreground text-base mb-2">
+                  {service.name}
+                </h3>
+                <p className="text-muted-foreground text-sm">
+                  {service.description}
                 </p>
-                <p className="font-heading font-bold text-white text-sm">
-                  {t.authorName}
-                </p>
-                <p className="text-xs text-white/50">{t.roleOrBusiness}</p>
               </motion.div>
             ))}
+          </div>
+
+          <div className="text-center mt-8">
+            <p className="text-muted-foreground text-sm">
+              <MapPin className="inline w-4 h-4 text-primary mr-1" />
+              Servicio a domicilio disponible en toda Caracas · Precios en USD
+            </p>
           </div>
         </div>
       </section>
 
-      {/* Pricing Section */}
-      <section id="precios" className="py-24 bg-muted/30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* GALERÍA */}
+      <section id="galeria" className="py-20 px-4 bg-card/50">
+        <div className="max-w-6xl mx-auto">
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-16"
+            className="text-center mb-12"
           >
-            <span className="inline-block bg-orange/10 text-orange text-xs font-semibold px-4 py-1.5 rounded-full mb-4 tracking-wider uppercase">
-              Paquetes y Precios
-            </span>
-            <h2 className="font-heading font-extrabold text-3xl md:text-4xl text-foreground">
-              Elige el plan perfecto
-              <span className="text-orange block">para tu negocio</span>
+            <div className="flex items-center justify-center gap-3 mb-4">
+              <div className="h-px w-10 bg-primary" />
+              <span className="text-primary text-xs font-bold tracking-[0.3em]">
+                MI TRABAJO
+              </span>
+              <div className="h-px w-10 bg-primary" />
+            </div>
+            <h2 className="font-heading text-4xl font-black text-foreground uppercase">
+              GALERÍA
             </h2>
-            <p className="text-muted-foreground mt-4 max-w-lg mx-auto text-sm">
-              Precios accesibles para emprendedores venezolanos. Incluye
-              creación del sitio y mantenimiento mensual para mantenerlo siempre
-              actualizado.
-            </p>
           </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-8 items-stretch">
-            {activePackages.map((pkg, i) => (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {GALLERY_PHOTOS.map((photo, i) => (
               <motion.div
-                key={pkg.id}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
+                key={photo.src}
+                initial={{ opacity: 0, scale: 0.95 }}
+                whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1 }}
-                className={`relative flex flex-col rounded-3xl border-2 overflow-hidden transition-all ${
-                  pkg.isPopular
-                    ? "border-orange shadow-2xl bg-white scale-[1.02]"
-                    : "border-border bg-white shadow-card hover:shadow-card-hover"
-                }`}
-                data-ocid={`pricing.item.${i + 1}`}
+                className="group relative overflow-hidden rounded-lg aspect-square"
+                data-ocid={`gallery.item.${i + 1}`}
               >
-                {pkg.isPopular && (
-                  <div className="absolute top-0 left-0 right-0 bg-orange text-white text-center text-xs font-bold py-2 tracking-wider uppercase">
-                    ⭐ Más Popular
-                  </div>
-                )}
-
-                <div className={`p-8 ${pkg.isPopular ? "pt-12" : ""}`}>
-                  <h3 className="font-heading font-extrabold text-2xl text-foreground mb-2">
-                    {pkg.name}
-                  </h3>
-                  <p className="text-muted-foreground text-sm mb-6 leading-relaxed">
-                    {pkg.description}
+                <img
+                  src={photo.src}
+                  alt={photo.label}
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-background/0 group-hover:bg-background/60 transition-all duration-300 flex items-end">
+                  <p className="w-full text-center text-primary font-bold text-sm py-3 translate-y-8 group-hover:translate-y-0 transition-transform duration-300">
+                    {photo.label}
                   </p>
-
-                  {/* Pricing */}
-                  <div className="bg-muted/40 rounded-2xl p-5 mb-6 space-y-3">
-                    <div className="flex items-baseline justify-between">
-                      <div>
-                        <p className="text-xs text-muted-foreground uppercase font-semibold tracking-wide">
-                          Creación
-                        </p>
-                        <p className="font-heading font-extrabold text-3xl text-navy">
-                          ${pkg.price}
-                          <span className="text-sm font-normal text-muted-foreground ml-1">
-                            USD
-                          </span>
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-xs text-muted-foreground uppercase font-semibold tracking-wide">
-                          Mantenimiento
-                        </p>
-                        <p className="font-heading font-bold text-xl text-teal">
-                          ${pkg.maintenancePrice}
-                          <span className="text-xs font-normal text-muted-foreground ml-1">
-                            /mes
-                          </span>
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Features */}
-                  <ul className="space-y-3 mb-8">
-                    {pkg.features.map((feat) => (
-                      <li key={feat} className="flex items-start gap-3 text-sm">
-                        <span className="flex-shrink-0 w-5 h-5 rounded-full bg-teal/10 flex items-center justify-center mt-0.5">
-                          <Check className="w-3 h-3 text-teal" />
-                        </span>
-                        <span className="text-foreground">{feat}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                {/* CTA */}
-                <div className="mt-auto p-8 pt-0">
-                  <a
-                    href={getWhatsAppLink(pkg.name)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={`flex items-center justify-center gap-2 w-full py-4 rounded-full font-heading font-bold text-sm transition-all ${
-                      pkg.isPopular
-                        ? "bg-orange text-white hover:bg-orange/90 shadow-lg"
-                        : "bg-navy text-white hover:bg-navy/90"
-                    }`}
-                    data-ocid={`pricing.primary_button.${i + 1}`}
-                  >
-                    <MessageCircle className="w-4 h-4" />
-                    Quiero este paquete
-                  </a>
                 </div>
               </motion.div>
             ))}
           </div>
-
-          <motion.p
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            className="text-center text-xs text-muted-foreground mt-8 max-w-xl mx-auto leading-relaxed"
-          >
-            * Los precios están expresados en dólares ($) y pueden variar según
-            la tasa del mercado. Se actualizan mensualmente para mantenerse
-            alineados con el mercado venezolano.
-          </motion.p>
         </div>
       </section>
 
-      {/* Contact Section */}
-      <section id="contacto" className="py-24 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-16 items-start">
+      {/* SOBRE MÍ + BLOG */}
+      <section className="py-20 px-4">
+        <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12">
+          {/* Sobre Mí */}
+          <div id="sobre-mi">
             <motion.div
-              initial={{ opacity: 0, x: -30 }}
+              initial={{ opacity: 0, x: -20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
             >
-              <span className="inline-block bg-teal/10 text-teal text-xs font-semibold px-4 py-1.5 rounded-full mb-4 tracking-wider uppercase">
-                Contacto
-              </span>
-              <h2 className="font-heading font-extrabold text-3xl md:text-4xl text-foreground mb-6">
-                Hablemos de tu
-                <span className="text-orange block">proyecto digital</span>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="h-px w-10 bg-primary" />
+                <span className="text-primary text-xs font-bold tracking-[0.3em]">
+                  QUIÉN SOY
+                </span>
+              </div>
+              <h2 className="font-heading text-4xl font-black text-foreground uppercase mb-6">
+                SOBRE MÍ
               </h2>
-              <p className="text-muted-foreground leading-relaxed mb-8">
-                ¿Listo para dar el salto digital? Escríbeme y cuéntame sobre tu
-                negocio. Te respondo rápido y sin compromiso.
-              </p>
-              <div className="space-y-4">
-                <a
-                  href={`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent("Hola Luz! Me interesa saber más sobre tus servicios de creación de sitios web y blogs. ¿Puedes ayudarme?")}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-3 text-sm text-muted-foreground hover:text-foreground transition-colors"
-                  data-ocid="contact.link"
-                >
-                  <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-600">
-                    <MessageCircle className="w-5 h-5" />
+              <div className="flex gap-6 items-start">
+                <div className="flex-shrink-0 w-20 h-20 bg-card border-2 border-primary rounded-full flex items-center justify-center">
+                  <Scissors className="w-8 h-8 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-heading font-bold text-primary text-xl mb-2">
+                    Miguel
+                  </h3>
+                  <p className="text-xs text-muted-foreground/60 tracking-widest mb-3">
+                    BARBERO PROFESIONAL · CARACAS
+                  </p>
+                  <p className="text-muted-foreground text-sm leading-relaxed mb-3">
+                    Empecé cortando entre amigos y familiares, perfeccionando mi
+                    técnica con cada cliente. Hoy ofrezco un servicio
+                    profesional desde casa y a domicilio por toda Caracas.
+                  </p>
+                  <p className="text-muted-foreground text-sm leading-relaxed mb-4">
+                    Especializado en fades, degradados y arreglo de barba. Llevo
+                    la barbería hasta donde tú estés, con los mejores productos
+                    y atención personalizada.
+                  </p>
+                  <div className="flex items-center gap-1">
+                    {[1, 2, 3, 4, 5].map((s) => (
+                      <Star
+                        key={s}
+                        className="w-4 h-4 fill-primary text-primary"
+                      />
+                    ))}
+                    <span className="text-muted-foreground text-xs ml-2">
+                      +100 clientes satisfechos
+                    </span>
                   </div>
-                  WhatsApp: +58 0412-5828010
-                </a>
+                </div>
               </div>
             </motion.div>
+          </div>
 
-            <motion.form
-              initial={{ opacity: 0, x: 30 }}
+          {/* Blog preview */}
+          <div>
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              onSubmit={handleSubmit}
-              className="bg-muted/30 rounded-3xl p-8 border border-border"
-              data-ocid="contact.modal"
             >
-              <div className="grid sm:grid-cols-2 gap-4 mb-4">
-                <div>
-                  <label
-                    htmlFor="name"
-                    className="block text-sm font-medium text-foreground mb-1.5"
+              <div className="flex items-center gap-3 mb-4">
+                <div className="h-px w-10 bg-primary" />
+                <span className="text-primary text-xs font-bold tracking-[0.3em]">
+                  ARTÍCULOS
+                </span>
+              </div>
+              <h2 className="font-heading text-4xl font-black text-foreground uppercase mb-6">
+                BLOG
+              </h2>
+              <div className="space-y-4">
+                {displayPosts.slice(0, 2).map((post) => (
+                  <div
+                    key={post.title}
+                    className="bg-card border border-border rounded-lg p-5 hover:border-primary/50 transition-colors"
                   >
-                    Nombre
-                  </label>
-                  <input
-                    id="name"
-                    value={form.name}
-                    onChange={(e) =>
-                      setForm((p) => ({ ...p, name: e.target.value }))
-                    }
-                    required
-                    className="w-full border border-border rounded-xl px-4 py-3 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal/50"
-                    placeholder="Tu nombre"
-                    data-ocid="contact.input"
-                  />
-                </div>
-                <div>
-                  <label
-                    htmlFor="email"
-                    className="block text-sm font-medium text-foreground mb-1.5"
-                  >
-                    Email
-                  </label>
-                  <input
-                    id="email"
-                    type="email"
-                    value={form.email}
-                    onChange={(e) =>
-                      setForm((p) => ({ ...p, email: e.target.value }))
-                    }
-                    required
-                    className="w-full border border-border rounded-xl px-4 py-3 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal/50"
-                    placeholder="tu@email.com"
-                    data-ocid="contact.input"
-                  />
-                </div>
+                    <h3 className="font-heading font-bold text-foreground text-sm mb-2 uppercase">
+                      {post.title}
+                    </h3>
+                    <p className="text-muted-foreground text-xs leading-relaxed line-clamp-3">
+                      {post.content}
+                    </p>
+                    <Link
+                      to="/blog"
+                      className="inline-flex items-center gap-1 text-primary text-xs font-semibold mt-3 hover:opacity-80 transition-opacity"
+                      data-ocid="blog.link"
+                    >
+                      Leer más <ChevronRight className="w-3 h-3" />
+                    </Link>
+                  </div>
+                ))}
               </div>
-              <div className="mb-4">
-                <label
-                  htmlFor="subject"
-                  className="block text-sm font-medium text-foreground mb-1.5"
+              <div className="mt-4">
+                <Link
+                  to="/blog"
+                  className="text-primary text-sm font-bold tracking-widest uppercase hover:opacity-80 flex items-center gap-2"
+                  data-ocid="blog.link"
                 >
-                  Asunto
-                </label>
-                <input
-                  id="subject"
-                  value={form.subject}
-                  onChange={(e) =>
-                    setForm((p) => ({ ...p, subject: e.target.value }))
-                  }
-                  required
-                  className="w-full border border-border rounded-xl px-4 py-3 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal/50"
-                  placeholder="¿En qué puedo ayudarte?"
-                  data-ocid="contact.input"
-                />
+                  VER TODOS LOS ARTÍCULOS <ChevronRight className="w-4 h-4" />
+                </Link>
               </div>
-              <div className="mb-6">
-                <label
-                  htmlFor="message"
-                  className="block text-sm font-medium text-foreground mb-1.5"
-                >
-                  Mensaje
-                </label>
-                <textarea
-                  id="message"
-                  rows={5}
-                  value={form.message}
-                  onChange={(e) =>
-                    setForm((p) => ({ ...p, message: e.target.value }))
-                  }
-                  required
-                  className="w-full border border-border rounded-xl px-4 py-3 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal/50 resize-none"
-                  placeholder="Cuéntame sobre tu negocio y qué necesitas..."
-                  data-ocid="contact.textarea"
-                />
-              </div>
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full bg-orange text-white font-heading font-bold py-4 rounded-full hover:bg-orange/90 transition-colors disabled:opacity-50"
-                data-ocid="contact.submit_button"
-              >
-                {isSubmitting ? "Enviando..." : "Enviar Mensaje"}
-              </button>
-            </motion.form>
+            </motion.div>
           </div>
+        </div>
+      </section>
+
+      {/* CTA CONTACTO */}
+      <section
+        id="contacto"
+        className="py-20 px-4 bg-card/50 border-t border-border"
+      >
+        <div className="max-w-2xl mx-auto text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            <h2 className="font-heading text-4xl font-black text-foreground uppercase mb-4">
+              ¿LISTO PARA TU <span className="text-primary">CORTE?</span>
+            </h2>
+            <p className="text-muted-foreground mb-8">
+              Escríbeme por WhatsApp y agenda tu cita. A domicilio en toda
+              Caracas o desde mi casa.
+            </p>
+            <a
+              href="https://wa.me/5804125828010?text=Hola!%20Vi%20tu%20página%20y%20me%20interesa%20un%20corte%20💈"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-3 bg-[#25D366] text-white px-8 py-4 rounded font-bold tracking-widest text-sm uppercase hover:opacity-90 transition-opacity"
+              data-ocid="contact.primary_button"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                className="w-5 h-5 fill-white"
+                role="img"
+                aria-hidden="true"
+              >
+                <title>WhatsApp</title>
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+              </svg>
+              AGENDAR POR WHATSAPP
+            </a>
+          </motion.div>
         </div>
       </section>
 

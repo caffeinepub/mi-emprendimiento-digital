@@ -1,27 +1,30 @@
-# Crear y Crecer - Paquetes y Precios
+# Barbería Profesional - Sitio Web y Blog
 
 ## Current State
-Plataforma 'Crear y Crecer' con homepage, blog, panel admin, boton WhatsApp flotante y burbuja de bienvenida. El backend tiene BlogPost, Testimonial, Subscriber y ContactMessage. No existe seccion de precios ni paquetes de servicios.
+Proyecto nuevo, sin código previo.
 
 ## Requested Changes (Diff)
 
 ### Add
-- Tipo `ServicePackage` en el backend con campos: id, name, description, price (en USD), features (lista), isPopular, maintenancePrice, active
-- Funciones backend: `getServicePackages`, `upsertServicePackage`, `deleteServicePackage` (solo admin)
-- Seccion de precios/paquetes en HomePage con 3 paquetes predeterminados: Basico, Estandar, Premium
-- Cada paquete muestra precio de creacion + precio de mantenimiento mensual
-- Nota visible: los precios estan sujetos a actualizacion segun el valor del dolar
-- Panel de administracion de paquetes en AdminPage: crear, editar y eliminar paquetes y actualizar precios
+- Sitio web completo para un barbero emprendedor en Caracas, Venezuela
+- Página de inicio (Hero con foto, nombre del barbero, slogan)
+- Sección de servicios con precios en USD (precios del mercado caraqueño): Corte básico $5, Corte + barba $8, Fade/degradado $7, Arreglo de barba $4, Corte a domicilio +$3
+- Galería de fotos de cortes realizados (4 fotos de ejemplo)
+- Sección "Sobre mí" del barbero
+- Blog con artículos de tendencias y consejos de estilo masculino
+- Botón flotante de WhatsApp (+5804125828010) en todas las páginas
+- Panel de administración en /admin para gestionar blog, galería y precios
+- Diseño oscuro, masculino, con acentos dorados
 
 ### Modify
-- HomePage: agregar seccion de paquetes entre las secciones existentes
-- AdminPage: agregar tab/seccion para gestionar paquetes de servicios y precios
+- N/A (proyecto nuevo)
 
 ### Remove
-- Nada
+- N/A
 
 ## Implementation Plan
-1. Agregar tipo ServicePackage y funciones CRUD al backend Motoko
-2. Actualizar HomePage con seccion de paquetes visualmente atractiva
-3. Agregar gestion de paquetes al AdminPage
-4. Incluir nota sobre actualizacion de precios por variacion del dolar
+1. Backend: Actor Motoko con tipos para servicios, posts de blog, galería
+2. Frontend: React con Tailwind, diseño oscuro carbón + dorado
+3. Páginas: Home, Servicios, Galería, Blog, Sobre Mí, Admin
+4. Botón flotante WhatsApp en layout global
+5. Admin panel para editar precios, posts y fotos

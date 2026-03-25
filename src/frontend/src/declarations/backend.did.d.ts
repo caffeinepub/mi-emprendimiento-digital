@@ -11,38 +11,15 @@ import type { IDL } from '@icp-sdk/core/candid';
 import type { Principal } from '@icp-sdk/core/principal';
 
 export interface BlogPost {
-  'id' : string,
-  'coverImageURL' : string,
   'title' : string,
   'content' : string,
-  'published' : boolean,
-  'createdAt' : Time,
-  'summary' : string,
-  'updatedAt' : Time,
-  'category' : string,
+  'publishedAt' : Time,
 }
-export interface ContactMessage {
-  'id' : string,
-  'subject' : string,
+export interface GalleryItem { 'title' : string, 'imageUrl' : string }
+export interface ServiceItem {
   'name' : string,
-  'email' : string,
-  'receivedAt' : Time,
-  'message' : string,
-}
-export interface ContactMessageInput {
-  'subject' : string,
-  'name' : string,
-  'email' : string,
-  'message' : string,
-}
-export interface Subscriber { 'signupDate' : Time, 'email' : string }
-export interface Testimonial {
-  'id' : string,
-  'roleOrBusiness' : string,
-  'createdAt' : Time,
-  'authorName' : string,
-  'message' : string,
-  'rating' : bigint,
+  'description' : string,
+  'price' : number,
 }
 export type Time = bigint;
 export interface UserProfile { 'name' : string }
@@ -77,38 +54,22 @@ export interface _SERVICE {
   >,
   '_caffeineStorageUpdateGatewayPrincipals' : ActorMethod<[], undefined>,
   '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
-  /**
-   * / ****************** Newsletter Subscribers *******************
-   */
-  'addSubscriber' : ActorMethod<[string], undefined>,
+  'addBlogPost' : ActorMethod<[BlogPost], undefined>,
+  'addGalleryItem' : ActorMethod<[GalleryItem], undefined>,
+  'addService' : ActorMethod<[ServiceItem], undefined>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
-  /**
-   * / ****************** Blog Posts *******************
-   */
-  'createOrUpdateBlogPost' : ActorMethod<[BlogPost], undefined>,
-  /**
-   * / ****************** Testimonials *******************
-   */
-  'createOrUpdateTestimonial' : ActorMethod<[Testimonial], undefined>,
-  'deleteBlogPost' : ActorMethod<[string], undefined>,
-  'deleteTestimonial' : ActorMethod<[string], undefined>,
-  'getBlogPost' : ActorMethod<[string], BlogPost>,
-  'getBlogPosts' : ActorMethod<[boolean], Array<BlogPost>>,
+  'getBlogPosts' : ActorMethod<[], Array<BlogPost>>,
   /**
    * / ****************** User Profiles *******************
    */
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
-  'getContactMessages' : ActorMethod<[], Array<ContactMessage>>,
-  'getSubscribers' : ActorMethod<[], Array<Subscriber>>,
-  'getTestimonials' : ActorMethod<[], Array<Testimonial>>,
+  'getGallery' : ActorMethod<[], Array<GalleryItem>>,
+  'getServices' : ActorMethod<[], Array<ServiceItem>>,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
-  /**
-   * / ****************** Contact Messages *******************
-   */
-  'submitContactMessage' : ActorMethod<[ContactMessageInput], undefined>,
+  'updateService' : ActorMethod<[ServiceItem], undefined>,
 }
 export declare const idlService: IDL.ServiceClass;
 export declare const idlInitArgs: IDL.Type[];

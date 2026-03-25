@@ -17,12 +17,11 @@ export default {
     extend: {
       fontFamily: {
         heading: ["'Montserrat'", "sans-serif"],
-        body: ["'Open Sans'", "sans-serif"],
+        body: ["'Inter'", "sans-serif"],
       },
       colors: {
-        navy: "oklch(var(--navy) / <alpha-value>)",
-        orange: "oklch(var(--orange) / <alpha-value>)",
-        teal: "oklch(var(--teal) / <alpha-value>)",
+        gold: "oklch(var(--primary) / <alpha-value>)",
+        charcoal: "oklch(var(--background) / <alpha-value>)",
         border: "oklch(var(--border))",
         input: "oklch(var(--input))",
         ring: "oklch(var(--ring) / <alpha-value>)",
@@ -80,8 +79,9 @@ export default {
         sm: "calc(var(--radius) - 4px)",
       },
       boxShadow: {
-        xs: "0 1px 2px 0 rgba(0,0,0,0.05)",
-        card: "0 4px 20px 0 rgba(15,46,74,0.1)",
+        xs: "0 1px 2px 0 rgba(0,0,0,0.3)",
+        card: "0 4px 20px 0 rgba(0,0,0,0.4)",
+        gold: "0 0 20px 0 rgba(201,161,90,0.25)",
       },
       keyframes: {
         "accordion-down": {

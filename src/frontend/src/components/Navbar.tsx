@@ -1,165 +1,142 @@
-import { Link, useRouter } from "@tanstack/react-router";
-import { ChevronDown, Menu, X } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
+import { Link } from "@tanstack/react-router";
+import { Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
-const navLinks = [
-  { label: "Inicio", href: "/" },
-  { label: "Servicios", href: "/#servicios", subtitle: "Negocios & Creadores" },
-  { label: "Blog", href: "/blog" },
-  { label: "Sobre Mí", href: "/#sobre-mi" },
-  { label: "Contacto", href: "/#contacto" },
+const NAV_LINKS = [
+  { label: "INICIO", href: "/" },
+  { label: "SERVICIOS", href: "/#servicios" },
+  { label: "GALERÍA", href: "/#galeria" },
+  { label: "SOBRE MÍ", href: "/#sobre-mi" },
+  { label: "BLOG", href: "/blog" },
+  { label: "CONTACTO", href: "/#contacto" },
 ];
 
 export default function Navbar() {
-  const [isOpen, setIsOpen] = useState(false);
+  const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const router = useRouter();
-  const currentPath = router.state.location.pathname;
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    const handler = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", handler);
+    return () => window.removeEventListener("scroll", handler);
   }, []);
 
   const handleNavClick = (href: string) => {
-    setIsOpen(false);
+    setOpen(false);
     if (href.startsWith("/#")) {
       const id = href.slice(2);
-      if (currentPath === "/") {
-        document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
-      } else {
-        router.navigate({ to: "/" }).then(() => {
-          setTimeout(() => {
-            document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
-          }, 200);
-        });
-      }
+      const el = document.getElementById(id);
+      if (el) el.scrollIntoView({ behavior: "smooth" });
     }
   };
 
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled ? "bg-navy shadow-lg" : "bg-navy"
+        scrolled
+          ? "bg-background/95 backdrop-blur-sm shadow-lg border-b border-border"
+          : "bg-transparent"
       }`}
     >
-      <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2" data-ocid="nav.link">
-            <div className="w-9 h-9 rounded-full bg-orange flex items-center justify-center">
-              <span className="text-white font-heading font-bold text-sm">
-                CC
-              </span>
-            </div>
-            <span className="font-heading font-bold text-white text-lg tracking-wide">
-              Crear y Crecer
+          <Link to="/" className="flex items-center gap-3" data-ocid="nav.link">
+            <img
+              src="/assets/generated/barberia-logo-transparent.dim_300x300.png"
+              alt="Barbería Profesional Logo"
+              className="h-10 w-10 object-contain"
+            />
+            <span className="font-heading font-bold text-lg text-primary hidden sm:block">
+              BARBERÍA PROFESIONAL
             </span>
           </Link>
 
           {/* Desktop Nav */}
-          <ul className="hidden md:flex items-center gap-6">
-            {navLinks.map((link) => (
-              <li key={link.label}>
-                {link.href.startsWith("/#") ? (
-                  <button
-                    type="button"
-                    onClick={() => handleNavClick(link.href)}
-                    className="flex flex-col items-center text-white/90 hover:text-orange transition-colors"
-                    data-ocid="nav.link"
-                  >
-                    <span className="text-sm font-medium flex items-center gap-1">
-                      {link.label}
-                      {link.subtitle && <ChevronDown className="w-3 h-3" />}
-                    </span>
-                    {link.subtitle && (
-                      <span className="text-xs text-white/50">
-                        {link.subtitle}
-                      </span>
-                    )}
-                  </button>
-                ) : (
-                  <Link
-                    to={link.href}
-                    className="text-sm font-medium text-white/90 hover:text-orange transition-colors"
-                    data-ocid="nav.link"
-                  >
-                    {link.label}
-                  </Link>
-                )}
-              </li>
-            ))}
-            <li>
-              <button
-                type="button"
-                onClick={() => handleNavClick("/#contacto")}
-                className="bg-orange text-white text-sm font-semibold px-5 py-2 rounded-full hover:bg-orange/90 transition-colors"
-                data-ocid="nav.primary_button"
-              >
-                Consulta Gratis
-              </button>
-            </li>
-          </ul>
+          <nav className="hidden lg:flex items-center gap-6">
+            {NAV_LINKS.map((link) =>
+              link.href.startsWith("/#") ? (
+                <button
+                  key={link.label}
+                  type="button"
+                  onClick={() => handleNavClick(link.href)}
+                  className="text-xs font-semibold tracking-widest text-muted-foreground hover:text-primary transition-colors"
+                  data-ocid="nav.link"
+                >
+                  {link.label}
+                </button>
+              ) : (
+                <Link
+                  key={link.label}
+                  to={link.href}
+                  className="text-xs font-semibold tracking-widest text-muted-foreground hover:text-primary transition-colors"
+                  data-ocid="nav.link"
+                >
+                  {link.label}
+                </Link>
+              ),
+            )}
+            <a
+              href="https://wa.me/5804125828010?text=Hola!%20Vi%20tu%20página%20y%20me%20interesa%20un%20corte%20💈"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-primary text-primary-foreground px-4 py-2 rounded text-xs font-bold tracking-widest hover:opacity-90 transition-opacity"
+              data-ocid="nav.primary_button"
+            >
+              RESERVAR
+            </a>
+          </nav>
 
-          {/* Mobile Hamburger */}
+          {/* Mobile menu button */}
           <button
             type="button"
-            className="md:hidden text-white"
-            onClick={() => setIsOpen(!isOpen)}
-            aria-label="Toggle menu"
+            className="lg:hidden text-foreground p-2"
+            onClick={() => setOpen(!open)}
+            aria-label="Menú"
             data-ocid="nav.toggle"
           >
-            {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            {open ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
         </div>
-      </nav>
+      </div>
 
       {/* Mobile Menu */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="md:hidden bg-navy border-t border-white/10"
+      {open && (
+        <div className="lg:hidden bg-background/98 border-t border-border px-4 py-6 space-y-4">
+          {NAV_LINKS.map((link) =>
+            link.href.startsWith("/#") ? (
+              <button
+                key={link.label}
+                type="button"
+                onClick={() => handleNavClick(link.href)}
+                className="block w-full text-left text-sm font-semibold tracking-widest text-muted-foreground hover:text-primary transition-colors py-2"
+                data-ocid="nav.link"
+              >
+                {link.label}
+              </button>
+            ) : (
+              <Link
+                key={link.label}
+                to={link.href}
+                onClick={() => setOpen(false)}
+                className="block text-sm font-semibold tracking-widest text-muted-foreground hover:text-primary transition-colors py-2"
+                data-ocid="nav.link"
+              >
+                {link.label}
+              </Link>
+            ),
+          )}
+          <a
+            href="https://wa.me/5804125828010?text=Hola!%20Vi%20tu%20página%20y%20me%20interesa%20un%20corte%20💈"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block bg-primary text-primary-foreground px-4 py-3 rounded text-center text-sm font-bold tracking-widest"
+            data-ocid="nav.primary_button"
           >
-            <ul className="flex flex-col px-4 py-4 gap-4">
-              {navLinks.map((link) => (
-                <li key={link.label}>
-                  {link.href.startsWith("/#") ? (
-                    <button
-                      type="button"
-                      onClick={() => handleNavClick(link.href)}
-                      className="text-white/90 text-sm font-medium hover:text-orange transition-colors w-full text-left"
-                    >
-                      {link.label}
-                    </button>
-                  ) : (
-                    <Link
-                      to={link.href}
-                      onClick={() => setIsOpen(false)}
-                      className="text-white/90 text-sm font-medium hover:text-orange transition-colors block"
-                    >
-                      {link.label}
-                    </Link>
-                  )}
-                </li>
-              ))}
-              <li>
-                <button
-                  type="button"
-                  onClick={() => handleNavClick("/#contacto")}
-                  className="bg-orange text-white text-sm font-semibold px-5 py-2 rounded-full w-full"
-                >
-                  Consulta Gratis
-                </button>
-              </li>
-            </ul>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            RESERVAR AHORA
+          </a>
+        </div>
+      )}
     </header>
   );
 }

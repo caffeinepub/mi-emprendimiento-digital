@@ -1,222 +1,110 @@
-import { useAddSubscriber } from "@/hooks/useQueries";
 import { Link } from "@tanstack/react-router";
-import { Facebook, Instagram, Mail, Phone, Send, Youtube } from "lucide-react";
-import { useState } from "react";
-import { toast } from "sonner";
+import { Instagram, Scissors } from "lucide-react";
 
 export default function Footer() {
-  const [email, setEmail] = useState("");
-  const { mutateAsync: addSubscriber, isPending } = useAddSubscriber();
-  const currentYear = new Date().getFullYear();
-
-  const handleSubscribe = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email) return;
-    try {
-      await addSubscriber(email);
-      toast.success("¡Suscrito exitosamente!");
-      setEmail("");
-    } catch {
-      toast.error("Error al suscribirse. Intente de nuevo.");
-    }
-  };
+  const year = new Date().getFullYear();
+  const hostname = encodeURIComponent(
+    typeof window !== "undefined" ? window.location.hostname : "",
+  );
 
   return (
-    <footer className="bg-navy text-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+    <footer className="bg-card border-t border-border">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
           {/* Brand */}
           <div>
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-9 h-9 rounded-full bg-orange flex items-center justify-center">
-                <span className="text-white font-heading font-bold text-sm">
-                  CC
-                </span>
-              </div>
-              <span className="font-heading font-bold text-white text-lg">
-                Crear y Crecer
+            <div className="flex items-center gap-3 mb-4">
+              <img
+                src="/assets/generated/barberia-logo-transparent.dim_300x300.png"
+                alt="Logo"
+                className="h-10 w-10 object-contain"
+              />
+              <span className="font-heading font-bold text-primary text-base">
+                BARBERÍA PROFESIONAL
               </span>
             </div>
-            <p className="text-white/60 text-sm leading-relaxed mb-4">
-              Ayudamos a negocios locales y creadores de contenido a establecer
-              su presencia digital profesional.
+            <p className="text-muted-foreground text-sm leading-relaxed">
+              Cortes de calidad en Caracas, Venezuela. A domicilio y en casa.
+              Especialistas en fade, degradado y barba.
             </p>
-            <div className="flex gap-3">
-              <a
-                href="https://instagram.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-orange transition-colors"
-                aria-label="Instagram"
-              >
-                <Instagram className="w-4 h-4" />
-              </a>
-              <a
-                href="https://facebook.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-orange transition-colors"
-                aria-label="Facebook"
-              >
-                <Facebook className="w-4 h-4" />
-              </a>
-              <a
-                href="https://youtube.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-orange transition-colors"
-                aria-label="YouTube"
-              >
-                <Youtube className="w-4 h-4" />
-              </a>
-            </div>
           </div>
 
-          {/* Services */}
+          {/* Links */}
           <div>
-            <h4 className="font-heading font-semibold text-white mb-4">
-              Servicios
-            </h4>
-            <ul className="space-y-2 text-sm text-white/60">
+            <h3 className="font-heading font-bold text-sm tracking-widest text-primary mb-4">
+              NAVEGACIÓN
+            </h3>
+            <ul className="space-y-2">
               <li>
-                <a
-                  href="/#servicios"
-                  className="hover:text-orange transition-colors"
+                <Link
+                  to="/"
+                  className="text-muted-foreground hover:text-primary text-sm transition-colors"
+                  data-ocid="footer.link"
                 >
-                  Sitios Web para Negocios
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/#servicios"
-                  className="hover:text-orange transition-colors"
-                >
-                  Páginas para Creadores
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/#servicios"
-                  className="hover:text-orange transition-colors"
-                >
-                  Tiendas Online
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/#servicios"
-                  className="hover:text-orange transition-colors"
-                >
-                  SEO y Marketing Digital
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/#servicios"
-                  className="hover:text-orange transition-colors"
-                >
-                  Consultoría de Marca
-                </a>
-              </li>
-            </ul>
-          </div>
-
-          {/* Quick Links */}
-          <div>
-            <h4 className="font-heading font-semibold text-white mb-4">
-              Links Rápidos
-            </h4>
-            <ul className="space-y-2 text-sm text-white/60">
-              <li>
-                <Link to="/" className="hover:text-orange transition-colors">
                   Inicio
                 </Link>
               </li>
               <li>
                 <Link
                   to="/blog"
-                  className="hover:text-orange transition-colors"
+                  className="text-muted-foreground hover:text-primary text-sm transition-colors"
+                  data-ocid="footer.link"
                 >
                   Blog
                 </Link>
               </li>
               <li>
-                <a
-                  href="/#sobre-mi"
-                  className="hover:text-orange transition-colors"
-                >
-                  Sobre Mí
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/#contacto"
-                  className="hover:text-orange transition-colors"
-                >
-                  Contacto
-                </a>
-              </li>
-              <li>
                 <Link
                   to="/admin"
-                  className="hover:text-orange transition-colors"
+                  className="text-muted-foreground hover:text-primary text-sm transition-colors"
+                  data-ocid="footer.link"
                 >
-                  Admin
+                  Administración
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Newsletter */}
+          {/* Contact */}
           <div>
-            <h4 className="font-heading font-semibold text-white mb-4">
-              Newsletter
-            </h4>
-            <p className="text-white/60 text-sm mb-4">
-              Suscríbete para recibir tips de emprendimiento digital.
-            </p>
-            <form onSubmit={handleSubscribe} className="flex gap-2">
-              <input
-                type="email"
-                id="footer-newsletter-email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Tu correo electrónico"
-                className="flex-1 bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-sm text-white placeholder-white/40 focus:outline-none focus:border-teal"
-                data-ocid="footer.input"
-              />
-              <button
-                type="submit"
-                disabled={isPending}
-                className="w-10 h-10 rounded-full bg-orange flex items-center justify-center hover:bg-orange/90 transition-colors flex-shrink-0"
-                data-ocid="footer.submit_button"
-              >
-                <Send className="w-4 h-4 text-white" />
-              </button>
-            </form>
-
-            <div className="mt-4 flex items-center gap-2 text-white/60 text-xs">
-              <Mail className="w-3 h-3" />
-              <span>hola@crearyCrecer.com</span>
-            </div>
-            <div className="flex items-center gap-2 text-white/60 text-xs mt-1">
-              <Phone className="w-3 h-3" />
-              <span>+1 (555) 123-4567</span>
-            </div>
+            <h3 className="font-heading font-bold text-sm tracking-widest text-primary mb-4">
+              CONTACTO
+            </h3>
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              <li className="flex items-center gap-2">
+                <Scissors className="w-4 h-4 text-primary" />
+                Caracas, Venezuela
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="text-primary font-bold">📱</span>
+                <a
+                  href="https://wa.me/5804125828010"
+                  className="hover:text-primary transition-colors"
+                >
+                  +58 0412-5828010
+                </a>
+              </li>
+              <li className="flex items-center gap-2">
+                <Instagram className="w-4 h-4 text-primary" />
+                <span>@barberiacaracas</span>
+              </li>
+            </ul>
           </div>
         </div>
 
-        <div className="border-t border-white/10 mt-10 pt-6 text-center text-white/40 text-xs">
-          © {currentYear}. Construido con <span className="text-orange">♥</span>{" "}
-          usando{" "}
-          <a
-            href={`https://caffeine.ai?utm_source=caffeine-footer&utm_medium=referral&utm_content=${encodeURIComponent(typeof window !== "undefined" ? window.location.hostname : "")}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:text-orange transition-colors"
-          >
-            caffeine.ai
-          </a>
+        <div className="border-t border-border mt-10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-muted-foreground">
+          <p>© {year}. Todos los derechos reservados.</p>
+          <p>
+            Construido con ❤️ usando{" "}
+            <a
+              href={`https://caffeine.ai?utm_source=caffeine-footer&utm_medium=referral&utm_content=${hostname}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:underline"
+            >
+              caffeine.ai
+            </a>
+          </p>
         </div>
       </div>
     </footer>
